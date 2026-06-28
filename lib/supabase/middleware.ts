@@ -36,11 +36,13 @@ export async function updateSession(request: NextRequest) {
 
   // Public paths that do not require auth:
   const isLoginPage = path === '/login'
-  const isAuthRoute = isLoginPage
+  const isForgotPasswordPage = path === '/forgot-password'
+  const isUpdatePasswordPage = path === '/update-password'
+  const isAuthRoute = isLoginPage || isForgotPasswordPage || isUpdatePasswordPage
   const isApiRoute = path.startsWith('/api')
   const isStaticRoute = path.startsWith('/_next') || path === '/favicon.ico' || path === '/next.svg' || path === '/vercel.svg'
 
-  // If not authenticated and trying to access any page other than login, redirect to login
+  // If not authenticated and trying to access any page other than public auth pages, redirect to login
   if (!user && !isAuthRoute && !isApiRoute && !isStaticRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'

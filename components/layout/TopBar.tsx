@@ -2,18 +2,22 @@
 
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { LogOut, User, Bell } from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
+import { LogOut, Bell } from 'lucide-react'
 
 interface TopBarProps {
   userName?: string
   userEmail?: string
   wardNumber?: number | null
+  notificationCount?: number
 }
 
-export default function TopBar({ userName = 'Panchayat User', userEmail = '', wardNumber = null }: TopBarProps) {
+export default function TopBar({ userName = 'Panchayat User', userEmail = '', wardNumber = null, notificationCount = 0 }: TopBarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
+  const [open, setOpen] = useState(false)
 
   // Generate a page title based on path
   const getPageTitle = () => {
@@ -35,7 +39,8 @@ export default function TopBar({ userName = 'Panchayat User', userEmail = '', wa
 
   return (
     <header className="flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white px-6 shadow-sm dark:border-slate-800 dark:bg-zinc-950">
-      <div>
+      <div className="flex items-center gap-3">
+        <img src="/logo.png" alt="Soochika logo" className="h-10 w-10 rounded-2xl bg-slate-100 p-1" />
         <h1 className="text-xl font-bold tracking-tight text-slate-800 dark:text-zinc-50">
           {getPageTitle()}
         </h1>
@@ -48,10 +53,34 @@ export default function TopBar({ userName = 'Panchayat User', userEmail = '', wa
           </span>
         )}
 
-        <button className="relative text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-          <Bell className="h-5.5 w-5.5" />
-          <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-teal-500" />
-        </button>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            className="relative text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+            aria-label="Open notifications"
+          >
+            <Bell className="h-5.5 w-5.5" />
+            {notificationCount > 0 ? (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+                {notificationCount}
+              </span>
+            ) : null}
+          </button>
+          {open ? (
+            <div className="absolute right-0 top-9 z-50 w-80 rounded-lg border border-slate-200 bg-white p-4 text-sm shadow-lg dark:border-slate-800 dark:bg-zinc-900">
+              <div className="font-bold text-slate-900 dark:text-white">Notifications</div>
+              <p className="mt-2 text-slate-600 dark:text-zinc-400">
+                {notificationCount > 0
+                  ? `${notificationCount} pending request${notificationCount === 1 ? '' : 's'} need review, including death reports if submitted.`
+                  : 'No pending requests right now.'}
+              </p>
+              <Link href="/requests" onClick={() => setOpen(false)} className="mt-3 inline-flex font-semibold text-teal-700">
+                Review requests
+              </Link>
+            </div>
+          ) : null}
+        </div>
 
         <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
 

@@ -10,8 +10,7 @@ import {
   BarChart3, 
   FileText, 
   Settings, 
-  Menu,
-  ShieldAlert
+  Menu
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -38,9 +37,7 @@ export default function Sidebar({ role = 'asha_worker', className }: SidebarProp
   return (
     <aside className={cn("flex flex-col w-64 bg-slate-900 border-r border-slate-800 text-slate-300 min-h-screen", className)}>
       <div className="flex items-center gap-2.5 px-6 py-5 border-b border-slate-800">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-400">
-          <ShieldAlert className="h-5 w-5" />
-        </div>
+        <img src="/logo.png" alt="Soochika logo" className="h-9 w-9 rounded-xl" />
         <div>
           <span className="text-lg font-bold text-white tracking-tight">Soochika</span>
           <span className="block text-[10px] text-teal-400 font-semibold uppercase tracking-wider">PBMS Portal</span>

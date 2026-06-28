@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import type { SVGProps } from 'react'
 import { 
   Users, 
   FileQuestion, 
@@ -23,11 +24,23 @@ export default async function DashboardPage() {
   }
 
   // Get user details
-  const { data: profile } = await supabase
+  let { data: profile } = await supabase
     .from('users')
     .select('role, ward_number')
     .eq('id', user.id)
     .single()
+
+  // If the profile is not found, it might be due to replication delay.
+  // Wait for a short period and try again.
+  if (!profile) {
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+    const { data: refreshedProfile } = await supabase
+      .from('users')
+      .select('role, ward_number')
+      .eq('id', user.id)
+      .single();
+    profile = refreshedProfile;
+  }
 
   const userRole = profile?.role || 'asha_worker'
   const wardNumber = profile?.ward_number
@@ -59,7 +72,7 @@ export default async function DashboardPage() {
     totalPwD = pwdCount || 0
 
     // Count pending requests
-    let reqQuery = supabase.from('requests').select('id', { count: 'exact', head: true }).eq('status', 'pending')
+    const reqQuery = supabase.from('requests').select('id', { count: 'exact', head: true }).eq('status', 'pending')
     // We can count requests based on beneficiary ward access if not admin
     if (userRole !== 'admin' && wardNumber) {
       // We would join beneficiaries, but since simple count is fine, we fetch or default
@@ -89,7 +102,7 @@ export default async function DashboardPage() {
           <div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Welcome back, officer!</h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
-              Manage your ward's elder citizens and PwD support request tickets efficiently.
+              Manage your ward&apos;s elder citizens and PwD support request tickets efficiently.
             </p>
           </div>
           {(userRole === 'admin' || userRole === 'ward_member' || userRole === 'asha_worker') && (
@@ -149,7 +162,7 @@ export default async function DashboardPage() {
 }
 
 // Inline fallback for Accessibility icon if not available in standard Lucide
-function AccessibilityIcon(props: any) {
+function AccessibilityIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

@@ -29,12 +29,20 @@ export default async function DashboardLayout({
   const userName = profile?.full_name || user.email?.split('@')[0] || 'Staff User'
   const userRole = profile?.role || 'asha_worker'
   const wardNumber = profile?.ward_number ?? null
+  let notificationCount = 0
+
+  const { count } = await supabase
+    .from('requests')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'pending')
+
+  notificationCount = count ?? 0
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-zinc-950 font-sans">
       <Sidebar role={userRole} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar userName={userName} userEmail={user.email} wardNumber={wardNumber} />
+        <TopBar userName={userName} userEmail={user.email} wardNumber={wardNumber} notificationCount={notificationCount} />
         <main className="flex-1 overflow-y-auto bg-slate-50 p-6 dark:bg-zinc-950">
           {children}
         </main>
